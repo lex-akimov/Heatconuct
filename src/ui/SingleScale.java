@@ -7,8 +7,11 @@ import java.awt.Graphics2D;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import static ui.CONSTANTS.BACKGROUND;
+import static ui.CONSTANTS.COLOR_POSITIVE;
+
 class SingleScale extends Scale {
-    private SingleScale.SingleBar singleBar = new SingleScale.SingleBar();
+    private SingleBar singleBar = new SingleBar();
 
     SingleScale(ImageIcon icon, float max) {
         super(icon, max);
@@ -16,11 +19,11 @@ class SingleScale extends Scale {
     }
 
     public void repaint(float value) {
-        if (this.singleBar != null) {
-            this.singleBar.repaint(value);
+        super.repaint(value);
+        if (singleBar != null) {
+            singleBar.repaint(value);
         }
 
-        super.repaint(value);
     }
 
     private class SingleBar extends JComponent {
@@ -28,30 +31,30 @@ class SingleScale extends Scale {
         float length;
 
         SingleBar() {
-            this.setPreferredSize(new Dimension(SingleScale.this.width + 1, SingleScale.this.height + 1));
+            this.setPreferredSize(new Dimension(width + 1, height + 1));
         }
 
         private void repaint(float value) {
             this.value = value;
-            this.length = Math.abs((float)SingleScale.this.width / SingleScale.this.absMax * value);
+            this.length = Math.abs((float)width / absMax * value);
             super.repaint();
         }
 
         public void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D)g;
-            g2d.setColor(StaticFinals.background);
-            g2d.fillRect(0, 0, SingleScale.this.width, SingleScale.this.height);
-            g2d.setColor(StaticFinals.positive);
-            g2d.fillRect(0, 0, (int)this.length, SingleScale.this.height);
+            g2d.setColor(BACKGROUND);
+            g2d.fillRect(0, 0, width, height);
+            g2d.setColor(COLOR_POSITIVE);
+            g2d.fillRect(0, 0, (int)this.length, height);
             g2d.setColor(Color.BLACK);
-            g2d.drawRect(0, 0, SingleScale.this.width, SingleScale.this.height);
+            g2d.drawRect(0, 0, width, height);
 
-            for(int i = 0; (float)i < SingleScale.this.absMax * 4.0F / 10.0F; ++i) {
-                int n = (int)((float)SingleScale.this.width / (SingleScale.this.absMax * 2.0F / 10.0F) * (float)i);
+            for(int i = 0; (float)i < absMax * 4.0F / 10.0F; ++i) {
+                int n = (int)((float)width / (absMax * 2.0F / 10.0F) * (float)i);
                 if (i % 2 == 0) {
-                    g2d.drawLine(n, SingleScale.this.height - SingleScale.this.every10, n, SingleScale.this.height);
-                } else if (SingleScale.this.absMax < 100.0F) {
-                    g2d.drawLine(n, SingleScale.this.height - SingleScale.this.every5, n, SingleScale.this.height);
+                    g2d.drawLine(n, height - every10, n, height);
+                } else if (absMax < 100.0F) {
+                    g2d.drawLine(n, height - every5, n, height);
                 }
             }
 

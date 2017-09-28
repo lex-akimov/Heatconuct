@@ -7,20 +7,22 @@ import java.awt.Graphics2D;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import static ui.CONSTANTS.COLOR_POSITIVE;
+
 class DoubleScale extends Scale {
-    private DoubleScale.DoubleBar doubleBar = new DoubleScale.DoubleBar();
+    private DoubleBar doubleBar = new DoubleBar();
 
     DoubleScale(ImageIcon icon, float max) {
         super(icon, max);
-        this.add(this.doubleBar);
+        this.add(doubleBar);
     }
 
     public void repaint(float value) {
-        if (this.doubleBar != null) {
-            this.doubleBar.repaint(value);
+        super.repaint(value);
+        if (doubleBar != null) {
+            doubleBar.repaint(value);
         }
 
-        super.repaint(value);
     }
 
     private class DoubleBar extends JComponent {
@@ -28,36 +30,36 @@ class DoubleScale extends Scale {
         float length;
 
         DoubleBar() {
-            this.setPreferredSize(new Dimension(DoubleScale.this.width + 1, DoubleScale.this.height + 1));
+            this.setPreferredSize(new Dimension(width + 1, height + 1));
         }
 
         private void repaint(float value) {
             this.value = value;
-            this.length = Math.abs((float)(DoubleScale.this.width / 2) / DoubleScale.this.absMax * value);
+            length = Math.abs((float) (width / 2) / absMax * value);
             super.repaint();
         }
 
         public void paintComponent(Graphics g) {
-            Graphics2D g2d = (Graphics2D)g;
-            g2d.setColor(StaticFinals.background);
-            g2d.fillRect(0, 0, DoubleScale.this.width, DoubleScale.this.height);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setColor(CONSTANTS.BACKGROUND);
+            g2d.fillRect(0, 0, width, height);
             if (this.value < 0.0F) {
-                g2d.setColor(StaticFinals.negative);
-                g2d.fillRect((int)((float)(DoubleScale.this.width / 2) - this.length), 0, (int)this.length + 1, DoubleScale.this.height);
+                g2d.setColor(CONSTANTS.COLOR_NEGATIVE);
+                g2d.fillRect((int) ((float) (width / 2) - length), 0, (int) length + 1, height);
             } else {
-                g2d.setColor(StaticFinals.positive);
-                g2d.fillRect(DoubleScale.this.width / 2, 0, (int)this.length, DoubleScale.this.height);
+                g2d.setColor(COLOR_POSITIVE);
+                g2d.fillRect(width / 2, 0, (int) length, height);
             }
 
             g2d.setColor(Color.BLACK);
-            g2d.drawRect(0, 0, DoubleScale.this.width, DoubleScale.this.height);
+            g2d.drawRect(0, 0, width, height);
 
-            for(int i = 0; (float)i < DoubleScale.this.absMax * 4.0F / 10.0F; ++i) {
-                int n = (int)((float)DoubleScale.this.width / (DoubleScale.this.absMax * 4.0F / 10.0F) * (float)i);
+            for (int i = 0; (float) i < absMax * 4.0F / 10.0F; ++i) {
+                int n = (int) ((float) width / (absMax * 4.0F / 10.0F) * (float) i);
                 if (i % 2 == 0) {
-                    g2d.drawLine(n, DoubleScale.this.height - DoubleScale.this.every10, n, DoubleScale.this.height);
-                } else if (DoubleScale.this.absMax < 100.0F) {
-                    g2d.drawLine(n, DoubleScale.this.height - DoubleScale.this.every5, n, DoubleScale.this.height);
+                    g2d.drawLine(n, height - every10, n, height);
+                } else if (absMax < 100.0F) {
+                    g2d.drawLine(n, height - every5, n, height);
                 }
             }
 

@@ -2,12 +2,10 @@ package ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.LayoutManager;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
+
 import parsing.Parser;
 
 class TemperatureChart extends JPanel implements KeyListener {
@@ -46,7 +44,7 @@ class TemperatureChart extends JPanel implements KeyListener {
         for(i = 1; i < this.layers.length; ++i) {
             int x = (int)(199.0F * (this.layers[i - 1] + this.layers[i]) / this.layers[this.layers.length - 1] + 45.0F);
             JTextField thickField = new JTextField(String.format("%.0f", this.layers[i] - this.layers[i - 1]));
-            thickField.setFont(StaticFinals.fontSmall);
+            thickField.setFont(CONSTANTS.FONT_SMALL);
             thickField.setBorder(null);
             thickField.setOpaque(false);
             thickField.setBounds(x - 12, 530, 25, 15);
@@ -57,7 +55,7 @@ class TemperatureChart extends JPanel implements KeyListener {
         }
 
         this.thickness = new JLabel(String.format("%.0f", this.layers[this.layers.length - 1]));
-        this.thickness.setFont(StaticFinals.fontSmall);
+        this.thickness.setFont(CONSTANTS.FONT_SMALL);
         this.thickness.setBounds(230, 550, 35, 15);
         this.add(this.thickness);
     }
@@ -101,7 +99,7 @@ class TemperatureChart extends JPanel implements KeyListener {
         }
 
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2d.setFont(StaticFinals.fontSmall);
+        g2d.setFont(CONSTANTS.FONT_SMALL);
 
         for(i = this.min; i <= this.max; i += 5) {
             if (drawDegreeLines && i < this.max) {

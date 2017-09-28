@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
-class NavigationPane extends JPanel implements ActionListener, KeyListener {
+class NavigationPane extends JPanel implements KeyListener {
     private JButton navBeginBtn;
     private JButton navEndBtn;
     private JButton navPrevBtn;
@@ -21,15 +21,15 @@ class NavigationPane extends JPanel implements ActionListener, KeyListener {
 
     NavigationPane() {
         this.setBorder(new EtchedBorder());
-        this.setLayout(new FlowLayout(1));
+        this.setLayout(new FlowLayout(FlowLayout.CENTER));
         this.navBeginBtn = new JButton("<<");
-        this.navBeginBtn.addActionListener(this);
+        this.navBeginBtn.addActionListener(new NavBeginActionListener());
         this.navEndBtn = new JButton(">>");
-        this.navEndBtn.addActionListener(this);
+        this.navEndBtn.addActionListener(new NavEndActionListener());
         this.navPrevBtn = new JButton("<");
-        this.navPrevBtn.addActionListener(this);
+        this.navPrevBtn.addActionListener(new NavPreviousActionListener());
         this.navNextBtn = new JButton(">");
-        this.navNextBtn.addActionListener(this);
+        this.navNextBtn.addActionListener(new NavNextActionListener());
         this.navCurrFrField = new JTextField(6);
         this.navCurrFrField.setHorizontalAlignment(0);
         this.navCurrFrField.addKeyListener(this);
@@ -67,57 +67,6 @@ class NavigationPane extends JPanel implements ActionListener, KeyListener {
         this.navFrCntLabel.setText(" из " + Window.parser.getFrameCount());
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(this.navBeginBtn)) {
-            this.buttonBeginAction();
-        }
-
-        if (e.getSource().equals(this.navEndBtn)) {
-            this.buttonEndAction();
-        }
-
-        if (e.getSource().equals(this.navPrevBtn)) {
-            this.buttonPreviousAction();
-        }
-
-        if (e.getSource().equals(this.navNextBtn)) {
-            this.buttonNextAction();
-        }
-
-    }
-
-    private void buttonNextAction() {
-        if (Window.parser.getFrameCount() > 1 && Window.currChart < Window.parser.getFrameCount() - 1) {
-            ++Window.currChart;
-            Window.mainPanel.repaint();
-        }
-
-    }
-
-    private void buttonPreviousAction() {
-        if (Window.parser.getFrameCount() > 1 && Window.currChart > 0) {
-            --Window.currChart;
-            Window.mainPanel.repaint();
-        }
-
-    }
-
-    private void buttonEndAction() {
-        if (Window.parser.getFrameCount() > 1 && Window.currChart < Window.parser.getFrameCount() - 1) {
-            Window.currChart = Window.parser.getFrameCount() - 1;
-            Window.mainPanel.repaint();
-        }
-
-    }
-
-    private void buttonBeginAction() {
-        if (Window.parser.getFrameCount() > 1) {
-            Window.currChart = 0;
-            Window.mainPanel.repaint();
-        }
-
-    }
-
     public void keyTyped(KeyEvent e) {
     }
 
@@ -142,5 +91,45 @@ class NavigationPane extends JPanel implements ActionListener, KeyListener {
     }
 
     public void keyReleased(KeyEvent e) {
+    }
+
+    private class NavBeginActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (Window.parser.getFrameCount() > 1) {
+                Window.currChart = 0;
+                Window.mainPanel.repaint();
+            }
+        }
+    }
+
+    private class NavEndActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (Window.parser.getFrameCount() > 1 && Window.currChart < Window.parser.getFrameCount() - 1) {
+                Window.currChart = Window.parser.getFrameCount() - 1;
+                Window.mainPanel.repaint();
+            }
+        }
+    }
+
+    private class NavPreviousActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (Window.parser.getFrameCount() > 1 && Window.currChart > 0) {
+                --Window.currChart;
+                Window.mainPanel.repaint();
+            }
+        }
+    }
+
+    private class NavNextActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (Window.parser.getFrameCount() > 1 && Window.currChart < Window.parser.getFrameCount() - 1) {
+                ++Window.currChart;
+                Window.mainPanel.repaint();
+            }
+        }
     }
 }

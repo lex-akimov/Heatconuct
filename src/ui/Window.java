@@ -1,8 +1,13 @@
 package ui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import parsing.ParseXLS;
+import parsing.Parser;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -11,14 +16,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import parsing.ParseCSV;
-import parsing.ParseXLS;
-import parsing.Parser;
 
 import static ui.CONSTANTS.WINDOW_TITLE;
 
@@ -26,11 +23,11 @@ public class Window extends JFrame {
     public static void main(String[] args) {
         Window window = new Window();
         if (args.length > 0) {
-            window.OpenXls(args[0]);
+            window.OpenXLS(args[0]);
         }
     }
 
-    private void OpenXls(String file) {
+    private void OpenXLS(String file) {
         try {
             parser = new ParseXLS(file);
             currChart = 0;
@@ -50,7 +47,7 @@ public class Window extends JFrame {
 
     static MainPane mainPanel;
     static NavigationPane navigationPanel;
-    private static PlayPane playPanel;
+    private static PlayerPane playPanel;
     static int currChart;
     static Parser parser;
 
@@ -59,16 +56,15 @@ public class Window extends JFrame {
         int width = 1000;
         int height = 700;
         this.setTitle(WINDOW_TITLE);
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(width, height));
-        this.setLayout(new BorderLayout());
-        this.setLocationRelativeTo(null);
-        this.setLocation(this.getX() - width / 2, this.getY() - height / 2);
         this.setResizable(false);
+        this.setLayout(new BorderLayout());
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.addJMenuBar();
         this.addPanels();
         this.pack();
         this.setVisible(true);
+        this.setLocationRelativeTo(null);
     }
 
     private void addJMenuBar() {
@@ -117,7 +113,7 @@ public class Window extends JFrame {
         lowPanel.setBorder(new EtchedBorder());
         lowPanel.setLayout(new GridLayout(1, 0));
         lowPanel.add(navigationPanel = new NavigationPane());
-        lowPanel.add(playPanel = new PlayPane());
+        lowPanel.add(playPanel = new PlayerPane());
         this.add("Center", mainPanel = new MainPane());
         this.add("South", lowPanel);
     }
@@ -131,27 +127,23 @@ public class Window extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             FileNameExtensionFilter extXLS = new FileNameExtensionFilter("MS Excel 97-2003 (*.xls)", "xls");
-            FileNameExtensionFilter extCSV = new FileNameExtensionFilter("CSV-файл (*.csv)", "csv");
             JFileChooser jFileChooser = new JFileChooser();
-            jFileChooser.setFileSelectionMode(0);
+            jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             jFileChooser.setDialogTitle("Импорт файла");
             jFileChooser.setFileFilter(extXLS);
             int returnValue = jFileChooser.showOpenDialog(null);
             if (returnValue == 0) {
                 try {
-                    if (jFileChooser.getFileFilter().equals(extCSV)) {
-                        parser = new ParseCSV(jFileChooser.getSelectedFile().toString());
-                    } else if (jFileChooser.getFileFilter().equals(extXLS)) {
+                    if (jFileChooser.getFileFilter().equals(extXLS)) {
                         parser = new ParseXLS(jFileChooser.getSelectedFile().toString());
                     }
-
                     currChart = 0;
                     menuFileExport.setEnabled(true);
                     navigationPanel.Activate();
                     playPanel.Activate();
                     mainPanel.Activate();
                 } catch (Exception var6) {
-                    JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка!", 0);
+                    JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -160,7 +152,7 @@ public class Window extends JFrame {
     private class ExportSingleActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            SimpleDateFormat exportName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            SimpleDateFormat exportName = new SimpleDateFormat("yyyy-MM-dd HH-mm");
             JFileChooser jFileChooser = new JFileChooser();
             jFileChooser.setDialogTitle("Экспорт текущего кадра");
             jFileChooser.setSelectedFile(new File(exportName.format(parser.getDatesArr()[currChart])));
@@ -169,13 +161,12 @@ public class Window extends JFrame {
             if (returnValue == 0) {
                 BufferedImage img = new BufferedImage(mainPanel.getWidth(), mainPanel.getHeight(), 1);
                 File file = new File(jFileChooser.getSelectedFile().getAbsolutePath() + ".png");
-
                 try {
                     savePicture(img, file);
-                    JOptionPane.showMessageDialog(getParent(), "Файл " + file.getName() + " сохранён.", "", 1);
+                    JOptionPane.showMessageDialog(getParent(), "Файл " + file.getName() + " сохранён.", "", JOptionPane.INFORMATION_MESSAGE);
                     img.flush();
                 } catch (IOException var7) {
-                    JOptionPane.showMessageDialog(getParent(), var7.getMessage(), "Ошибка", 0);
+                    JOptionPane.showMessageDialog(getParent(), var7.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -194,7 +185,6 @@ public class Window extends JFrame {
                 BufferedImage img = new BufferedImage(mainPanel.getWidth(), mainPanel.getHeight(), 1);
 
                 try {
-
                     int numOfThreads = 4;
                     ArrayList<SaveImageThread> imageSavingThreads = new ArrayList<>();
 
@@ -204,7 +194,7 @@ public class Window extends JFrame {
                         imageSavingThreads.add(thread);
                     }
 
-                    for (SaveImageThread imageSavingThread: imageSavingThreads) {
+                    for (SaveImageThread imageSavingThread : imageSavingThreads) {
                         imageSavingThread.join();
                     }
 
@@ -217,7 +207,7 @@ public class Window extends JFrame {
 
                     img.flush();
                     Date date2 = new Date();
-                    JOptionPane.showMessageDialog(getParent(), parser.getFrameCount() + " файлов успешно сохранёно за "+ (date2.getTime()-date1.getTime()), "", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(getParent(), parser.getFrameCount() + " файлов успешно сохранёно за " + (date2.getTime() - date1.getTime()), "", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException var6) {
                     JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
                 } catch (InterruptedException e1) {
@@ -307,14 +297,14 @@ public class Window extends JFrame {
         int id;
         int quantity;
 
-        SaveImageThread(int id, int quantity){
+        SaveImageThread(int id, int quantity) {
             this.id = id;
             this.quantity = quantity;
         }
 
         @Override
         public void run() {
-            for (int i = id-1; i < currChart; i+= quantity) {
+            for (int i = id - 1; i < currChart; i += quantity) {
 
             }
         }
