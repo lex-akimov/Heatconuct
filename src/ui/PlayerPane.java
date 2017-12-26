@@ -54,39 +54,47 @@ class PlayerPane extends JPanel {
         this.setFPS(30);
     }
 
+    private class PlayActionListener implements ActionListener {
+        @Override
+        //При нажатии на кнопку play
+        public void actionPerformed(ActionEvent e) {
+            //если не было воспроизведения
+            if (playBtn.getText().equals("PLAY")) {
+                //создаём отдельны потои и запускаем его
+                playerThread = new PlayThread();
+                playerThread.start();
+
+            } else if (!playerThread.isInterrupted()) {
+                //если воспроизведение уже шло, прерываем его
+                playerThread.interrupt();
+                playBtn.setText("PLAY");
+                Window.mainPanel.repaint();
+            }
+        }
+    }
+
     private class PlayThread extends Thread {
         public void run() {
             try {
+                //длительность кадра анимации в милисекундах
                 int playFPS = Math.round(1000 / getFPS());
                 playBtn.setText("PAUSE");
 
+                //запускаем цикл, пока не дойдём по последнего кадра или не прервём воспроизведение
                 while (Window.currChart < Window.parser.getFrameCount() - 1 && !this.isInterrupted()) {
                     ++Window.currChart;
                     Thread.sleep(playFPS);
                     Window.mainPanel.repaint();
                 }
+                //прерываем поток
                 this.interrupt();
                 playBtn.setText("PLAY");
             } catch (InterruptedException var2) {
                 System.out.println(var2.toString());
             } catch (IllegalArgumentException var3) {
+                //если неверно ввели частоту кадров, обрабатываем исключение
                 PlayerPane.this.setFPS(30);
                 JOptionPane.showMessageDialog(getParent(), "Введите целое положительное число", "Ошибка!", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private class PlayActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (playBtn.getText().equals("PLAY")) {
-                playerThread = new PlayThread();
-                playerThread.start();
-
-            } else if (!playerThread.isInterrupted()) {
-                playerThread.interrupt();
-                playBtn.setText("PLAY");
-                Window.mainPanel.repaint();
             }
         }
     }

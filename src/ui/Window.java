@@ -126,23 +126,37 @@ public class Window extends JFrame {
     private class OpenActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+
+            //Задаём расширение файла для открытия диалоговым окном
             FileNameExtensionFilter extXLS = new FileNameExtensionFilter("MS Excel 97-2003 (*.xls)", "xls");
+            //Создаём объект типа JFileChooser для открытия диалога выбота файла
             JFileChooser jFileChooser = new JFileChooser();
+            //Указываем тип - выбор файла
             jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            //Указываем заголовок окна
             jFileChooser.setDialogTitle("Импорт файла");
+            //Устанавливаем фильтр по расширению файла
             jFileChooser.setFileFilter(extXLS);
             int returnValue = jFileChooser.showOpenDialog(null);
+            //Если объект jFileChooser покажет что был выбран файл, заходим в if:
             if (returnValue == 0) {
                 try {
                     if (jFileChooser.getFileFilter().equals(extXLS)) {
+                        //Если выбранных файл является файлом расширения XLS, то
+                        // присваиваем ссылочном переменой parser новый объект типа ParseXLS,
+                        // с адресом файла в качестве параметра.
                         parser = new ParseXLS(jFileChooser.getSelectedFile().toString());
                     }
                     currChart = 0;
+                    //Далее вызываем функции активации некоторых компонент интерфейса программы
                     menuFileExport.setEnabled(true);
                     navigationPanel.Activate();
                     playPanel.Activate();
                     mainPanel.Activate();
+
+                    //Если возникает исключение, нам нужно его обработать!
                 } catch (Exception var6) {
+                    //Показываем информационное окно с сообщением об ошибке
                     JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 }
             }
