@@ -6,33 +6,34 @@
 package parsing;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Parser {
-    int frameCount;
-    Date[] datesArr;
-    float[] qIn;
-    float[] qOut;
-    float[] alphaIn;
-    float[] alphaOut;
-    float[][] temperatures;
-    HashMap parsingKeys;
-    private float tempMax;
-    private float tempMin;
-    private float qMin;
-    private float qMax;
-    private float alphaMin;
-    private float alphaMax;
-    public static int temperaturesCount;
+    protected int frameCount;
+    protected Date[] datesArr;
+    protected float[] qIn;
+    protected float[] qOut;
+    protected float[] alphaIn;
+    protected float[] alphaOut;
+    protected float[][] temperatures;
+    protected Map parsingKeys;
+    protected float tempMax;
+    protected float tempMin;
+    protected float qMin;
+    protected float qMax;
+    protected float alphaMin;
+    protected float alphaMax;
+    protected static int temperaturesCount;
 
-    Parser() {
+    private static int getTemperaturesCount() {
+        return temperaturesCount;
     }
 
     public int getFrameCount() {
         return this.frameCount;
     }
 
-    public Date[] getDatesArr() {
+    public Date[] getDatesArray() {
         return this.datesArr;
     }
 
@@ -63,83 +64,52 @@ public abstract class Parser {
         this.qMax = this.qIn[0];
         this.alphaMin = this.alphaIn[0];
         this.alphaMax = this.alphaIn[0];
-        float[][] var1 = this.temperatures;
-        int var2 = var1.length;
 
-        int var3;
-        for(var3 = 0; var3 < var2; ++var3) {
-            float[] temperature = var1[var3];
-            int var6 = temperature.length;
-
-            for(int var7 = 0; var7 < var6; ++var7) {
-                float aTemperature = temperature[var7];
-                if (aTemperature < this.tempMin) {
-                    this.tempMin = aTemperature;
+        for (float[] temperatureStrings : this.temperatures) {
+            for (float temperature : temperatureStrings) {
+                if (temperature < this.tempMin) {
+                    this.tempMin = temperature;
                 }
-
-                if (aTemperature > this.tempMax) {
-                    this.tempMax = aTemperature;
+                if (temperature > this.tempMax) {
+                    this.tempMax = temperature;
                 }
             }
         }
 
-        float[] var9 = this.qIn;
-        var2 = var9.length;
-
-        float anAlphaOut;
-        for(var3 = 0; var3 < var2; ++var3) {
-            anAlphaOut = var9[var3];
-            if (anAlphaOut > this.qMax) {
-                this.qMax = anAlphaOut;
+        for (float QInVal : this.qIn) {
+            if (QInVal > this.qMax) {
+                this.qMax = QInVal;
             }
-
-            if (anAlphaOut < this.qMin) {
-                this.qMin = anAlphaOut;
+            if (QInVal < this.qMin) {
+                this.qMin = QInVal;
             }
         }
 
-        var9 = this.qOut;
-        var2 = var9.length;
-
-        for(var3 = 0; var3 < var2; ++var3) {
-            anAlphaOut = var9[var3];
-            if (anAlphaOut > this.qMax) {
-                this.qMax = anAlphaOut;
+        for (float QOutVal : this.qOut) {
+            if (QOutVal > this.qMax) {
+                this.qMax = QOutVal;
             }
-
-            if (anAlphaOut < this.qMin) {
-                this.qMin = anAlphaOut;
+            if (QOutVal < this.qMin) {
+                this.qMin = QOutVal;
             }
         }
 
-        var9 = this.alphaIn;
-        var2 = var9.length;
-
-        for(var3 = 0; var3 < var2; ++var3) {
-            anAlphaOut = var9[var3];
+        for (float anAlphaIn : this.alphaIn) {
+            if (anAlphaIn > this.alphaMax) {
+                this.alphaMax = anAlphaIn;
+            }
+            if (anAlphaIn < this.alphaMin) {
+                this.alphaMin = anAlphaIn;
+            }
+        }
+        for (float anAlphaOut : this.alphaOut) {
             if (anAlphaOut > this.alphaMax) {
                 this.alphaMax = anAlphaOut;
             }
-
             if (anAlphaOut < this.alphaMin) {
                 this.alphaMin = anAlphaOut;
             }
         }
-
-        var9 = this.alphaOut;
-        var2 = var9.length;
-
-        for(var3 = 0; var3 < var2; ++var3) {
-            anAlphaOut = var9[var3];
-            if (anAlphaOut > this.alphaMax) {
-                this.alphaMax = anAlphaOut;
-            }
-
-            if (anAlphaOut < this.alphaMin) {
-                this.alphaMin = anAlphaOut;
-            }
-        }
-
     }
 
     public float getTempMax() {
@@ -151,10 +121,12 @@ public abstract class Parser {
     }
 
     public float getQMaxAbs() {
-        return Math.abs(this.qMin) > this.qMax ? Math.abs(this.qMin) : this.qMax;
+        if (Math.abs(this.qMin) > this.qMax) return Math.abs(this.qMin);
+        else return this.qMax;
     }
 
     public float getAlphaMaxAbs() {
-        return Math.abs(this.alphaMin) > this.alphaMax ? Math.abs(this.alphaMin) : this.alphaMax;
+        if (Math.abs(this.alphaMin) > this.alphaMax) return Math.abs(this.alphaMin);
+        else return this.alphaMax;
     }
 }

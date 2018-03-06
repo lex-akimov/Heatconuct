@@ -9,16 +9,16 @@ import java.io.FileInputStream;
 import java.util.Date;
 import java.util.HashMap;
 
+import jxl.Workbook;
 import jxl.Cell;
 import jxl.DateCell;
 import jxl.NumberCell;
 import jxl.Sheet;
-import jxl.Workbook;
 
-public class ParseXLS extends Parser {
+public class ParserXLS extends Parser {
     //Данный метод является кнструктором класса,
     // т.е. вызывается при создании экземпляра класса
-    public ParseXLS(String inputFile) throws Exception {
+    public ParserXLS(String inputFile) throws Exception {
         //создаём файловый поток, заполняем его открытым файлом.
         FileInputStream fileInputStream = new FileInputStream(inputFile);
         //Заполняем объект Workbook документом Excel
@@ -51,7 +51,7 @@ public class ParseXLS extends Parser {
 
         this.frameCount = 0;
         //Заполняем массив ячеек с номерами измерений
-        Cell[] NColumn = sheet.getColumn(((Integer) this.parsingKeys.get("N")).intValue());
+        Cell[] NColumn = sheet.getColumn((Integer) this.parsingKeys.get("N"));
 
         int i;
         for (i = 2; i < NColumn.length; ++i) {

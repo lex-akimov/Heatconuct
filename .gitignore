@@ -1,7 +1,5 @@
-/.idea/
-/libs/
-/out/
-/*.iml
-/подложка.png
-/пример.xls
-/руководство.docx
+.idea/
+out/
+*.iml
+target/
+/target/

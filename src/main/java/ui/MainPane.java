@@ -76,7 +76,7 @@ class MainPane extends JPanel {
 
         public void repaint() {
             if (Tout != null) {
-                Tout.setText(String.format("tнар. = %+2.1f ˚C", Window.parser.getTemperaturesArray()[currChart][Parser.temperaturesCount - 1]));
+                Tout.setText(String.format("tнар. = %+2.1f ˚C", Window.parser.getTemperaturesArray()[currChart][Parser.getTemperaturesCount() - 1]));
             }
 
             if (AlphaOut != null) {
@@ -123,7 +123,7 @@ class MainPane extends JPanel {
 
         public void repaint() {
             if (dateTimeLabel != null) {
-                dateTimeLabel.setText(MainPane.dateTime.format(Window.parser.getDatesArr()[currChart]));
+                dateTimeLabel.setText(MainPane.dateTime.format(Window.parser.getDatesArray()[currChart]));
             }
 
             if (Tin != null) {

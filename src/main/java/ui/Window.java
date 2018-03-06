@@ -1,6 +1,6 @@
 package ui;
 
-import parsing.ParseXLS;
+import parsing.ParserXLS;
 import parsing.Parser;
 
 import javax.imageio.ImageIO;
@@ -30,7 +30,7 @@ public class Window extends JFrame {
 
     private void OpenXLS(String file) {
         try {
-            parser = new ParseXLS(file);
+            parser = new ParserXLS(file);
             currChart = 0;
             this.menuFileExport.setEnabled(true);
             navigationPanel.Activate();
@@ -150,9 +150,9 @@ public class Window extends JFrame {
                 try {
                     if (jFileChooser.getFileFilter().equals(extXLS)) {
                         //Если выбранных файл является файлом расширения XLS, то
-                        // присваиваем ссылочном переменой parser новый объект типа ParseXLS,
+                        // присваиваем ссылочном переменой parser новый объект типа ParserXLS,
                         // с адресом файла в качестве параметра.
-                        parser = new ParseXLS(jFileChooser.getSelectedFile().toString());
+                        parser = new ParserXLS(jFileChooser.getSelectedFile().toString());
                     }
                     currChart = 0;
                     //Далее вызываем функции активации некоторых компонент интерфейса программы
@@ -178,7 +178,7 @@ public class Window extends JFrame {
             SimpleDateFormat exportName = new SimpleDateFormat("yyyy-MM-dd HH-mm");
             JFileChooser jFileChooser = new JFileChooser();
             jFileChooser.setDialogTitle("Экспорт текущего кадра");
-            jFileChooser.setSelectedFile(new File(exportName.format(parser.getDatesArr()[currChart])));
+            jFileChooser.setSelectedFile(new File(exportName.format(parser.getDatesArray()[currChart])));
             jFileChooser.setFileFilter(new FileNameExtensionFilter("Изображение в формате PNG", "png"));
             //Создаём диалоговое окно сохранения файла, автоматически указыаем имя файла по доате и времени
             int returnValue = jFileChooser.showSaveDialog(getParent());

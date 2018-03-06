@@ -62,7 +62,7 @@ class TemperatureChart extends JPanel implements KeyListener {
 
     protected void paintComponent(Graphics g) {
         float tempInside = Window.parser.getTemperaturesArray()[Window.currChart][0];
-        float tempOutside = Window.parser.getTemperaturesArray()[Window.currChart][Parser.temperaturesCount - 1];
+        float tempOutside = Window.parser.getTemperaturesArray()[Window.currChart][Parser.getTemperaturesCount() - 1];
         int heightInside = (int)((tempInside - (float)this.min) * 500.0F / (float)(this.max - this.min));
         int heightOutside = (int)((tempOutside - (float)this.min) * 500.0F / (float)(this.max - this.min));
         Graphics2D g2d = (Graphics2D)g;
