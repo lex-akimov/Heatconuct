@@ -27,7 +27,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.lexsoft.ui.Window</mainClass>
+                            <mainClass>com.lexsoft.Heatconduct.ui.Window</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
