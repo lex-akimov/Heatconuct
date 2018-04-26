@@ -1,5 +1,6 @@
 package com.lexsoft.Heatconduct.gElements;
 
+import com.lexsoft.Heatconduct.parsing.Parser;
 import com.lexsoft.Heatconduct.ui.CONSTANTS;
 import com.lexsoft.Heatconduct.ui.Window;
 
@@ -26,9 +27,17 @@ public class TemperatureChart extends JPanel implements KeyListener {
     public static Image background;
     public static boolean drawLayerBound = true;
     public static boolean drawDegreeLines = true;
+    private Integer current = 0;
+    private Parser parser;
 
-    public TemperatureChart(float min, float max) {
-        this.layers = new float[Window.parser.getTemperatures()[0].length - 2];
+
+    public TemperatureChart(Parser parser, Integer current) {
+        this.parser = parser;
+        this.current = current;
+        float min = parser.getTempMin();
+        float max = parser.getTempMax();
+
+        this.layers = new float[this.parser.getTemperatures()[0].length - 2];
         this.thicknessByLayers = new ArrayList<>();
         this.min = (int)(min - min % 5.0F - 5.0F);
         this.max = (int)(max - max % 5.0F + 5.0F);
@@ -63,8 +72,8 @@ public class TemperatureChart extends JPanel implements KeyListener {
     }
 
     protected void paintComponent(Graphics g) {
-        float tempInside = Window.parser.getTemperatures()[Window.currChart][0];
-        float tempOutside = Window.parser.getTemperatures()[Window.currChart][Window.parser.getTemperaturesCount() - 1];
+        float tempInside = parser.getTemperatures()[current][0];
+        float tempOutside = parser.getTemperatures()[current][parser.getTemperaturesCount() - 1];
         int heightInside = (int)((tempInside - (float)this.min) * 500.0F / (float)(this.max - this.min));
         int heightOutside = (int)((tempOutside - (float)this.min) * 500.0F / (float)(this.max - this.min));
         Graphics2D g2d = (Graphics2D)g;
@@ -95,7 +104,7 @@ public class TemperatureChart extends JPanel implements KeyListener {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setColor(Color.BLUE);
             g2d.setStroke(new BasicStroke(1.5F));
-            g2d.drawLine(x, 520 - (int)((Window.parser.getTemperatures()[Window.currChart][i] - (float)this.min) * 500.0F / (float)(this.max - this.min)), xx, 520 - (int)((Window.parser.getTemperatures()[Window.currChart][i + 1] - (float)this.min) * 500.0F / (float)(this.max - this.min)));
+            g2d.drawLine(x, 520 - (int)((parser.getTemperatures()[current][i] - (float)this.min) * 500.0F / (float)(this.max - this.min)), xx, 520 - (int)((parser.getTemperatures()[current][i + 1] - (float)this.min) * 500.0F / (float)(this.max - this.min)));
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             g2d.setStroke(new BasicStroke(1.0F));
             g2d.setColor(Color.BLACK);
@@ -149,7 +158,8 @@ public class TemperatureChart extends JPanel implements KeyListener {
 
     }
 
-    public void repaint() {
+    public void repaint(int current) {
+        this.current = current;
         super.repaint();
     }
 

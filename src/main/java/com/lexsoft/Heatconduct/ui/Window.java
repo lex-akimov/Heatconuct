@@ -3,6 +3,7 @@ package com.lexsoft.Heatconduct.ui;
 import com.lexsoft.Heatconduct.gElements.TemperatureChart;
 import com.lexsoft.Heatconduct.parsing.ParserXLS;
 import com.lexsoft.Heatconduct.parsing.Parser;
+import com.lexsoft.Heatconduct.parsing.ParsingException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,40 +21,45 @@ import java.util.Date;
 import static com.lexsoft.Heatconduct.ui.CONSTANTS.WINDOW_TITLE;
 
 public class Window extends JFrame {
+    private Integer current;
+    private Parser parser;
+
     private JMenu menuFileExport;
     private JMenuItem menuSettingsDrawLayers;
     private JMenuItem menuSettingsDrawDegreeLines;
 
-    static MainPane mainPanel;
-    public static NavigationPane navigationPanel;
-    private PlayerPane playPanel;
-    static JSlider slider;
-
-    public static int currChart;
-    public static Parser parser;
+    private RenderCanvas canvas;
+    private Navigator navigator;
+    private Player player;
 
     // Стартовый метод
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Window window = new Window();
+
+        // Метод для прямого открытия файла при запуске
+        // с параметром "имя_файла.xls" в консоли
         if (args.length > 0) {
-            window.OpenXLS(args[0]);
-            TemperatureChart.background = ImageIO.read(new File(args[1]));
+            try {
+                window.parser = new ParserXLS(args[0]);
+                TemperatureChart.background = ImageIO.read(new File(args[1]));
+                window.current = 0;
+                window.activate();
+            }
+            catch (ParsingException exc) {
+                JOptionPane.showMessageDialog(window, exc.getMessage(), "Ошибка при загрузке таблицы!", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (IOException ioexc) {
+                JOptionPane.showMessageDialog(window, ioexc.getMessage(), "Ошибка!", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
-    // Метод для прямого открытия файла при запуске
-    // с параметром "имя_файла.xls" в консоли
-    private void OpenXLS(String file) {
-        try {
-            parser = new ParserXLS(file);
-            currChart = 0;
-            this.menuFileExport.setEnabled(true);
-            navigationPanel.Activate();
-            playPanel.Activate();
-            mainPanel.Activate();
-        } catch (Exception var3) {
-            JOptionPane.showMessageDialog(this, var3.getMessage(), "Ошибка!", JOptionPane.ERROR_MESSAGE);
-        }
+    private void activate() {
+        menuFileExport.setEnabled(true);
+        this.add("Center", canvas = new RenderCanvas());
+        canvas.activate(parser, current);
+        navigator.activate(parser, canvas, current);
+        player.activate(parser, canvas, current);
     }
 
     private Window() {
@@ -71,7 +77,9 @@ public class Window extends JFrame {
         this.setLocationRelativeTo(null);
     }
 
-    /** Инициализация стандартное файловое меню*/
+    /**
+     * Инициализация меню
+     */
     private void addMenuBar() {
         JMenu menuFile = new JMenu("Файл");
         menuFileExport = new JMenu("Экспорт");
@@ -115,28 +123,24 @@ public class Window extends JFrame {
         this.setJMenuBar(menuBar);
     }
 
-    // Добавляем панели на окно программы
+    /**
+     * Добавляем панели на окно программы
+     */
     private void addPanels() {
         JPanel lowPanel = new JPanel();
         lowPanel.setBorder(new EtchedBorder());
-        lowPanel.setLayout(new BorderLayout(2,0));
-        lowPanel.add("West",navigationPanel = new NavigationPane());
-        lowPanel.add("East", playPanel = new PlayerPane());
+        lowPanel.setLayout(new BorderLayout(2, 0));
 
-        this.add("Center", mainPanel = new MainPane());
+        lowPanel.add("West", navigator = new Navigator());
+        lowPanel.add("East", player = new Player());
+
         this.add("South", lowPanel);
-        slider = new JSlider(0, 0);
-        lowPanel.add("South",slider);
     }
 
-    private void savePicture(BufferedImage img, File outputFile) throws IOException {
-        mainPanel.paint(img.getGraphics());
-        ImageIO.write(img, "png", outputFile);
-    }
-/**
- * Ниже приведены внутренние (Inner) классы для обработки событий
- * связанных с нажатиями на элементы графического интерфейса*/
-
+    /**
+     * Ниже приведены внутренние (Inner) классы для обработки событий
+     * связанных с нажатиями на элементы графического интерфейса
+     */
     private class OpenActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -161,21 +165,18 @@ public class Window extends JFrame {
                         // с адресом файла в качестве параметра.
                         parser = new ParserXLS(jFileChooser.getSelectedFile().toString());
                     }
-                    currChart = 0;
-                    slider.setMaximum(Window.parser.getFrameCount());
+                    current = 0;
                     //Далее вызываем функции активации некоторых компонент интерфейса программы
-                    menuFileExport.setEnabled(true);
-                    navigationPanel.Activate();
-                    playPanel.Activate();
-                    mainPanel.Activate();
-
+                    activate();
                     //Если возникает исключение, нам нужно его обработать!
-                } catch (Exception var6) {
+                }
+                catch (Exception var6) {
                     //Показываем информационное окно с сообщением об ошибке
                     JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
+
     }
 
     // Экспорт одной картинки
@@ -186,23 +187,25 @@ public class Window extends JFrame {
             SimpleDateFormat exportName = new SimpleDateFormat("yyyy-MM-dd HH-mm");
             JFileChooser jFileChooser = new JFileChooser();
             jFileChooser.setDialogTitle("Экспорт текущего кадра");
-            jFileChooser.setSelectedFile(new File(exportName.format(parser.getDates()[currChart])));
+            jFileChooser.setSelectedFile(new File(exportName.format(parser.getDates()[current])));
             jFileChooser.setFileFilter(new FileNameExtensionFilter("Изображение в формате PNG", "png"));
             //Создаём диалоговое окно сохранения файла, автоматически указыаем имя файла по доате и времени
             int returnValue = jFileChooser.showSaveDialog(getParent());
             if (returnValue == 0) { //Если нажата кнопка сохранить, то:
                 //Помещаем картинку в буфер
-                BufferedImage img = new BufferedImage(mainPanel.getWidth(), mainPanel.getHeight(), 1);
+                BufferedImage img = new BufferedImage(canvas.getWidth(), canvas.getHeight(), 1);
                 //Создаём новый файл
                 File file = new File(jFileChooser.getSelectedFile().getAbsolutePath() + ".png");
                 try {
                     //Сохраняем картинку из буфера в файл (отдельный метод см. ниже)
-                    savePicture(img, file);
+                    canvas.paint(img.getGraphics());
+                    ImageIO.write(img, "png", file);
                     JOptionPane.showMessageDialog(getParent(), "Файл " + file.getName() + " сохранён.", "", JOptionPane.INFORMATION_MESSAGE);
                     //Сливаем буфер
                     img.flush();
                     //При возникающих исключениях ввода-вывода обпабатываем их:
-                } catch (IOException var7) {
+                }
+                catch (IOException var7) {
                     JOptionPane.showMessageDialog(getParent(), var7.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -220,23 +223,30 @@ public class Window extends JFrame {
             if (returnValue == 0) {
                 Date savingStart = new Date();
 
-                BufferedImage img = new BufferedImage(mainPanel.getWidth(), mainPanel.getHeight(), 1);
+                String filePath = jFileChooser.getSelectedFile().getAbsolutePath();
+
+                SaveImageThread thread0 = new SaveImageThread(parser, filePath);
+                //SaveImageThread thread1 = new SaveImageThread(parser, filePath);
+                //SaveImageThread thread2 = new SaveImageThread(parser, filePath);
+                //SaveImageThread thread3 = new SaveImageThread(parser, filePath);
+
+                thread0.start();
+                //thread1.start();
+                //thread2.start();
+               // thread3.start();
 
                 try {
-                    for (int i = 0; i < parser.getFrameCount(); i++) {
-                        currChart = i;
-                        mainPanel.repaint();
-                        File file = new File(jFileChooser.getSelectedFile().getAbsolutePath() + "_" + String.format("%06d", i + 1) + ".png");
-                        savePicture(img, file);
-                    }
+                    thread0.join();
+                    //thread1.join();
+                    //thread2.join();
+                    //thread3.join();
 
-                    img.flush();
                     Date savingEnd = new Date();
                     JOptionPane.showMessageDialog(getParent(), parser.getFrameCount() +
-                            " файлов успешно сохранёно за " + (savingEnd.getTime() - savingStart.getTime()),
-                            "", JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException var6) {
-                    JOptionPane.showMessageDialog(getParent(), var6.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                            " файлов успешно сохранёно за " + (savingEnd.getTime() - savingStart.getTime()), "", JOptionPane.INFORMATION_MESSAGE);
+                }
+                catch (InterruptedException e1) {
+                    e1.printStackTrace();
                 }
             }
         }
@@ -280,10 +290,11 @@ public class Window extends JFrame {
                 int returnValue = jFileChooser.showOpenDialog(getParent());
                 if (returnValue == 0) {
                     TemperatureChart.background = ImageIO.read(jFileChooser.getSelectedFile());
-                    mainPanel.repaint();
+                    canvas.repaint(current);
                 }
 
-            } catch (IOException var3) {
+            }
+            catch (IOException var3) {
                 var3.printStackTrace();
             }
         }
@@ -295,11 +306,11 @@ public class Window extends JFrame {
             if (TemperatureChart.drawLayerBound) {
                 TemperatureChart.drawLayerBound = false;
                 menuSettingsDrawLayers.setText("Показать границы слоёв");
-                mainPanel.repaint();
+                canvas.repaint(current);
             } else {
                 TemperatureChart.drawLayerBound = true;
                 menuSettingsDrawLayers.setText("Скрыть границы слоёв");
-                mainPanel.repaint();
+                canvas.repaint(current);
             }
         }
     }
@@ -310,11 +321,11 @@ public class Window extends JFrame {
             if (TemperatureChart.drawDegreeLines) {
                 TemperatureChart.drawDegreeLines = false;
                 menuSettingsDrawDegreeLines.setText("Показать линии градусов");
-                mainPanel.repaint();
+                canvas.repaint(current);
             } else {
                 TemperatureChart.drawDegreeLines = true;
                 menuSettingsDrawDegreeLines.setText("Скрыть линии градусов");
-                mainPanel.repaint();
+                canvas.repaint(current);
             }
         }
     }
