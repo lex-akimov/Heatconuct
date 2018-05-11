@@ -96,7 +96,9 @@ public class Window extends JFrame {
         JMenuItem menuAboutCreators = new JMenuItem("Об авторе");
         JMenuBar menuBar = new JMenuBar();
 
-        /** Назначение ActionListeners */
+        /**
+         * Назначение ActionListeners
+         * */
         menuFileOpen.addActionListener(new OpenActionListener());
         menuFileExport.setEnabled(false);
         menuFileExportSingle.addActionListener(new ExportSingleActionListener());

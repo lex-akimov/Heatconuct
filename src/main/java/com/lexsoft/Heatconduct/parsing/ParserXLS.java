@@ -53,7 +53,7 @@ public class ParserXLS extends Parser {
             int parsingKeysSize = this.parsingKeys.size();
             for (int i = 0; i < this.frameCount; i++) {
                 Cell[] row = sheet.getRow(i + 2);
-                for (int j = 0; j < parsingKeysSize; j++) {
+                for (int j = 0; j <= parsingKeysSize; j++) {
                     String cell = keys[j].getContents();
                     try {
                         if (cell.equals("DATE")) {
